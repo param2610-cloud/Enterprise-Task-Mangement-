@@ -24,12 +24,18 @@
   },
   "homepage": "https://github.com/param2610-cloud/Enterprise-Task-Mangement-#readme",
   "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cloudinary": "^2.2.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "express-async-handler": "^1.2.0",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.1",
+    "multer": "^1.4.5-lts.1",
+    "resend": "^3.4.0",
     "uuid": "^10.0.0"
   },
   "devDependencies": {

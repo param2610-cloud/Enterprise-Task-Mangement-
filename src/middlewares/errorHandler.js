@@ -1,6 +1,9 @@
 import { logEvents } from "./logger.js";
 
 const ErrorHandler = (err, req, res, next) => {
+    if (res.headersSent) {
+        return next(err);
+    }
     logEvents(
         `${err.name}\t${err.message}\t${req.method}\t${req.url}\t${req.headers.origin || 'Unknown Origin'}`,
         "errLog.log"
