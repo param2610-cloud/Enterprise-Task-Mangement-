@@ -1,10 +1,14 @@
 import mongoose from "mongoose";
 import express from "express";
-import { registerUser } from "../controllers/user.Controller.js";
+import { loginUser, logoutUser, refreshAccesstoken, registerUser } from "../controllers/user.Controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
 router.post("/register", upload.single("avatar"), registerUser);
+router.post("/login", loginUser);
+router.post("/logout",verifyJWT, logoutUser);
+router.post("/refresh-token",refreshAccesstoken);
 
 export default router;
