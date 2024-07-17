@@ -6,12 +6,9 @@ import { corsoptions } from './config/corsOptions.js';
 import connectDB from './db/connect.js';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import cookieParser from 'cookie-parser';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+
 
 dotenv.config();
 
@@ -22,31 +19,28 @@ connectDB();
 
 app.use(logger);
 app.use(cors(corsoptions));
-app.use(express.json({ limit: "20kb" }));
-app.use(express.urlencoded({ extended: true, limit: "20kb" }));
-app.use('/', express.static(path.join(__dirname, "public")));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true}));
+app.use('/', express.static("public"));
 app.use(cookieParser());
 
 //router import 
 import router from './routes/router.js';
+import userRouter from './routes/user.router.js';
+import { registerUser } from './controllers/user.Controller.js';
+import { upload } from './middlewares/multer.middleware.js';
 
 //router declaration
-app.use('/api/v1', router);
+app.use('/api/v1/users', userRouter);
+// app.post('/api/v1/users/register',upload.single("avatar"), registerUser);
 
 
-
-app.all("*", (req, res) => {
-    res.status(404);
-    if (req.accepts('html')) {
-        res.sendFile(path.join(__dirname,'..', 'public', 'views', '404.html'));
-    } else if (req.accepts('json')) {
-        res.json({ message: '404 not found' });
-    } else {
-        res.type('txt').send('404 Not Found');
-    }
-});
 
 app.use(ErrorHandler);
+
+
+
+
 
 mongoose.connection.once('open', () => {
     console.log('Connection Established');

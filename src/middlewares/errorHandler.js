@@ -1,18 +1,16 @@
-import { logEvents } from "./logger.js";
 
-const ErrorHandler = (err, req, res, next) => {
-    if (res.headersSent) {
-        return next(err);
-    }
-    logEvents(
-        `${err.name}\t${err.message}\t${req.method}\t${req.url}\t${req.headers.origin || 'Unknown Origin'}`,
-        "errLog.log"
-    );
-    console.log(err.stack);
+import { logEvents } from '../middlewares/logger.js';
 
-    const status = res.statusCode && res.statusCode !== 200 ? res.statusCode : 500;
+const errorHandler = (err, req, res, next) => {
+    
+    logEvents(`${err.name}\t${err.message}\t${req.method}\t${req.url}\t${req.headers.origin || 'Unknown Origin'}`, "errLog.log");
+    
+    
+    const status = res.statusCode === 200 ? 500 : res.statusCode;
     res.status(status);
+    
+    
     res.json({ message: err.message });
 };
 
-export default ErrorHandler
+export default errorHandler;
