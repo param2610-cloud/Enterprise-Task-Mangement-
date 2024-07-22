@@ -25,13 +25,12 @@ app.use('/', express.static("public"));
 app.use(cookieParser());
 
 //router import 
-import router from './routes/router.js';
 import userRouter from './routes/user.router.js';
-import { registerUser } from './controllers/user.Controller.js';
-import { upload } from './middlewares/multer.middleware.js';
+import Roomrouter from './routes/room.router.js'
 
 //router declaration
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/rooms', Roomrouter);
 // app.post('/api/v1/users/register',upload.single("avatar"), registerUser);
 
 

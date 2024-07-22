@@ -7,7 +7,7 @@ const __dirname = path.dirname(__filename)
 const router = express.Router();
 
 //router import
-import Roomrouter from './room.router.js';
+
 import userRouter from './user.router.js';
 
 

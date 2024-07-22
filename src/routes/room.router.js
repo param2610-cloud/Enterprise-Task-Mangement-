@@ -1,9 +1,9 @@
-import mongoose from "mongoose";
-import express from 'express';
+import express from "express";
+import { getEmployeeList, MakeRoom } from "../controllers/room.controller.js";
+const router = express.Router();
 
-const Roomrouter=  express.Router();
 
-Roomrouter.route('/user')
-.get()
+router.get("/employee-list",getEmployeeList);
+router.post("/make-room",MakeRoom);
 
-export default Roomrouter
+export default router;
