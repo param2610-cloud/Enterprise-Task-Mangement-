@@ -167,35 +167,167 @@ const deleteMangerFromRoom = asyncHandler(async (req, res, next) => {
     }
 });
 
-const UpdateMangerToEmployeeinRoom = asyncHandler(async(req,res,next)=>{
-    const {ParentManagerId,roomId,UpdateManagerId} = req.body;
-    if(!(ParentManagerId ||roomId || UpdateManagerId) && ParentManagerId!==UpdateManagerId){
-        throw next(new ApiError(401, "ParentManagerId ||roomId || UpdateManagerId not Found or same manager id "));
+const UpdateMangerToEmployeeinRoom = asyncHandler(async (req, res, next) => {
+    const { ParentManagerId, roomId, UpdateManagerId } = req.body;
+    if (
+        !(ParentManagerId || roomId || UpdateManagerId) &&
+        ParentManagerId !== UpdateManagerId
+    ) {
+        throw next(
+            new ApiError(
+                401,
+                "ParentManagerId ||roomId || UpdateManagerId not Found or same manager id "
+            )
+        );
     }
     const roomDetails = Room.findById(roomId);
-    if(!roomDetails){
+    if (!roomDetails) {
         throw next(new ApiError(401, "No Room Found"));
     }
     const actualparentId = roomDetails.manager[0];
-    if(actualparentId!==ParentManagerId){
+    if (actualparentId !== ParentManagerId) {
         throw next(new ApiError(401, "He is not a parent room manager."));
     }
-    const managerExists = roomDetails.manager.some(id=>id.toString()===UpdateManagerId)
-    if(managerExists){
-        Room.updateOne({ _id: roomId }, {
-            $pull: { manager: UpdateManagerId },
-            $push: { employees: UpdateManagerId }
-          });
-          const employeetask = Employee.findById(UpdateManagerId);
-        //   const managerTask = 
-        const updatedEmployee = Employee.updateOne({_id: UpdateManagerId}, {
-            $set : {Role: "Employee"}
-        })
+    const managerExists = roomDetails.manager.some(
+        (id) => id.toString() === UpdateManagerId
+    );
+    if (!managerExists) {
+        throw next(new ApiError(401, "Manager is not exist at room"));
     }
-})
+    Room.updateOne(
+        { _id: roomId },
+        {
+            $pull: { manager: UpdateManagerId },
+            $push: { employees: UpdateManagerId },
+        }
+    );
+    const employeetask = Employee.findById(UpdateManagerId);
+    const managerTask = employeetask.tasks.personal;
+    const updatedEmployee = Employee.updateOne(
+        { _id: UpdateManagerId },
+        {
+            $set: { Role: "Employee", "tasks.personal": [] },
+        }
+    );
+    if (!updatedEmployee) {
+        throw next(new ApiError(501, "Employee is not updated"));
+    }
+    return res
+        .status(201)
+        .json(
+            new ApiResponse(
+                200,
+                { tasks: managerTask, updatedEmployee },
+                "Room updated Succesfully"
+            )
+        );
+});
 
-const AddEmployeeInRoom = asyncHandler(async(req,res,next)=>{
-    // const {managerId,userId}
-})
+const AddEmployeeInRoom = asyncHandler(async (req, res, next) => {
+    const { ParentManagerId, userId, roomId } = req.body;
+    if (!(ParentManagerId || roomId)) {
+        throw next(
+            new ApiError(
+                401,
+                "ParentManagerId ||roomId  not Found or same manager id "
+            )
+        );
+    }
+    const roomDetails = Room.findById(roomId);
+    if (!roomDetails) {
+        throw next(new ApiError(401, "No Room Found"));
+    }
+    const actualparentId = roomDetails.manager[0];
+    if (actualparentId !== ParentManagerId) {
+        throw next(new ApiError(401, "He is not a parent room manager."));
+    }
 
-export { getEmployeeList, MakeRoom,AddManagerinRoom,deleteMangerFromRoom };
+    const checkForAnyEmployeeeRecordInThisRoom = await Employee.find({
+        user: userId,
+        roomid: roomId,
+    });
+    if (checkForAnyEmployeeeRecordInThisRoom) {
+        return res
+            .status(201)
+            .json(
+                new ApiResponse(
+                    200,
+                    checkForAnyEmployeeeRecordInThisRoom,
+                    "User is already employee in this room"
+                )
+            );
+    }
+    const newEmployee = await Employee.create({
+        user: userId,
+        role: "Employee",
+        roomid: roomId,
+    });
+    if (!newEmployee) {
+        throw next(new ApiError(501, "Unable to create Employee"));
+    }
+    const updatedRoom = Room.findByIdAndUpdate(roomId, {
+        $push: { employees: newEmployee._id },
+    });
+    if (!updatedRoom) {
+        throw next(new ApiError(501, "Unable to update Room"));
+    }
+    return res
+        .status(201)
+        .json(
+            new ApiResponse(
+                200,
+                newEmployee,
+                updatedRoom,
+                "Employee Created and room updated."
+            )
+        );
+});
+
+const DeleteEmployeeFromRoom = asyncHandler(async (req, res, next) => {
+    const { ParentManagerId, userId, roomId } = req.body;
+
+    if (!(ParentManagerId || roomId)) {
+        throw next(new ApiError(401, "ParentManagerId or roomId not Found"));
+    }
+
+    const roomDetails = await Room.findById(roomId).populate('employees');
+
+    if (!roomDetails) {
+        throw next(new ApiError(401, "No Room Found"));
+    }
+
+    const actualParentId = roomDetails.manager[0];
+
+    if (actualParentId !== ParentManagerId) {
+        throw next(new ApiError(401, "You are not the parent room manager."));
+    }
+
+    const employeeRecord = await Employee.findOne({ user: userId, roomid: roomId });
+
+    if (!employeeRecord) {
+        return res.status(404).json(new ApiResponse(404, null, "Employee not found in this room"));
+    }
+
+    const employeeDetails = await Employee.findById(employeeRecord[0]._id)
+    const roomTasks = employeeDetails.tasks.room;
+    await Employee.deleteOne({ user: userId, roomid: roomId });
+
+    await Room.findByIdAndUpdate(roomId, {
+        $pull: { employees: employeeRecord._id }
+    });
+
+    
+
+    return res.status(200).json(new ApiResponse(200, roomTasks, "Employee removed and room tasks fetched."));
+});
+
+
+export {
+    getEmployeeList,
+    MakeRoom,
+    AddManagerinRoom,
+    deleteMangerFromRoom,
+    UpdateMangerToEmployeeinRoom,
+    AddEmployeeInRoom,
+    DeleteEmployeeFromRoom
+};
