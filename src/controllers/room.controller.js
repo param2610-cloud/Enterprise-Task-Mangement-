@@ -5,13 +5,13 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 const getEmployeeList = asyncHandler(async (req, res, next) => {
-    const { userId } = req.body;
+    const { userId } = req.query;
     if (!userId) {
         throw next(new ApiError(401, "User id not got."));
     }
     try {
-        const list = await Employee.find({ User: userId });
-
+        const list = await Employee.find({ user: userId });
+        console.log(list);
         return res
             .status(200)
             .json(new ApiResponse(200, list, "Employee News"));
@@ -24,9 +24,24 @@ const getEmployeeList = asyncHandler(async (req, res, next) => {
         );
     }
 });
+const GetRoomDetails = asyncHandler(async (req,res,next)=>{
+    const {roomId} = req.query;
+    if(!roomId){
+        new ApiError(
+            500,
+            error?.message || "Error occured while fethching data.")
+    
+    }
+    const RoomDetails = await Room.findById(roomId);
+    return res
+            .status(200)
+            .json(new ApiResponse(200, RoomDetails, "Room Details"));
+})
 
 const MakeRoom = asyncHandler(async (req, res, next) => {
-    const { userId, RoomName } = req.body;
+    const { user, RoomName } = req.body;
+    const userId = user;
+    console.log(userId,RoomName)
     if (!userId || !RoomName) {
         throw next(new ApiError(401, "User id not got."));
     }
@@ -50,6 +65,7 @@ const MakeRoom = asyncHandler(async (req, res, next) => {
     if (!CreatedEmployee) {
         throw next(new ApiError(401, "Employee manager is not created yet."));
     }
+    console.log(CreatedEmployee);
     const SyncRoomDetails = await Room.findByIdAndUpdate(RoomDetails._id, {
         $set: { "manager.0": CreatedEmployee._id },
     });
@@ -329,5 +345,6 @@ export {
     deleteMangerFromRoom,
     UpdateMangerToEmployeeinRoom,
     AddEmployeeInRoom,
-    DeleteEmployeeFromRoom
+    DeleteEmployeeFromRoom,
+    GetRoomDetails
 };

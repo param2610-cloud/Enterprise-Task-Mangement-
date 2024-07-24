@@ -186,4 +186,18 @@ const validateAccesstoken = asyncHandler(async (req,res,next)=>{
     }
 })
 
-export { registerUser, loginUser, logoutUser,refreshAccesstoken, validateAccesstoken };
+const getUserdetails = asyncHandler(async (req,res,next)=>{
+    const {userId} = req.query;
+    if(!userId){
+        throw next(new ApiError(401,"No user Id found"));
+    }
+    const userDetails = await User.findById(userId).select("-refreshToken -password");
+    console.log(userDetails);
+    if(!userDetails){
+        throw next(new ApiError(401,"No user details found"));
+    }
+    return res.status(200).json(new ApiResponse(200,userDetails,"User found"));
+    
+})
+
+export { registerUser, loginUser, logoutUser,refreshAccesstoken, validateAccesstoken,getUserdetails };
