@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import express from "express";
-import { getUserdetails, loginUser, logoutUser, refreshAccesstoken, registerUser, validateAccesstoken } from "../controllers/user.Controller.js";
+import { getEmployeedetails, getUserdetails, loginUser, logoutUser, refreshAccesstoken, registerUser, validateAccesstoken } from "../controllers/user.Controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -12,6 +12,7 @@ router.post("/logout",verifyJWT, logoutUser);
 router.post("/refresh-token",refreshAccesstoken);
 router.post("/validate-token",validateAccesstoken);
 router.get("/getUser",getUserdetails);
+router.get("/getEmployee",getEmployeedetails);
 
 
 export default router;

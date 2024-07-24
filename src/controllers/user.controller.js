@@ -4,6 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from 'jsonwebtoken';
+import { Employee } from "../model/employee.model.js";
 
 const registerUser = asyncHandler(async (req, res,next) => {
     const { fullName, email, password } = req.body;
@@ -169,7 +170,7 @@ const refreshAccesstoken = asyncHandler(async (req, res,next) => {
 
 
 const validateAccesstoken = asyncHandler(async (req,res,next)=>{
-    const incomingAccessToken = req.cookies.accessToken || req.headers['authorization'].substring(7);
+    const incomingAccessToken = req.cookies.accessToken ;
     if (!incomingAccessToken) {
         throw next(new ApiError(401, "unauthorized request"));
     }
@@ -188,16 +189,31 @@ const validateAccesstoken = asyncHandler(async (req,res,next)=>{
 
 const getUserdetails = asyncHandler(async (req,res,next)=>{
     const {userId} = req.query;
+    // console.log(userId);
     if(!userId){
         throw next(new ApiError(401,"No user Id found"));
     }
     const userDetails = await User.findById(userId).select("-refreshToken -password");
-    console.log(userDetails);
+    console.log(userId," found  ",userDetails);
     if(!userDetails){
         throw next(new ApiError(401,"No user details found"));
     }
     return res.status(200).json(new ApiResponse(200,userDetails,"User found"));
     
 })
+const getEmployeedetails = asyncHandler(async (req,res,next)=>{
+    const {employeeId} = req.query;
+    // console.log(userId);
+    if(!employeeId){
+        throw next(new ApiError(401,"No employee Id found"));
+    }
+    const employeeDetails = await Employee.findById(employeeId).select("-refreshToken -password");
+    console.log(employeeId," found  ",employeeDetails);
+    if(!employeeDetails){
+        throw next(new ApiError(401,"No user details found"));
+    }
+    return res.status(200).json(new ApiResponse(200,employeeDetails,"User found"));
+    
+})
 
-export { registerUser, loginUser, logoutUser,refreshAccesstoken, validateAccesstoken,getUserdetails };
+export { registerUser, loginUser, logoutUser,refreshAccesstoken, validateAccesstoken,getUserdetails,getEmployeedetails };
