@@ -27,10 +27,12 @@ app.use(cookieParser());
 //router import 
 import userRouter from './routes/user.router.js';
 import Roomrouter from './routes/room.router.js'
+import EmployeeRouter from './routes/employee.router.js'
 
 //router declaration
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/rooms', Roomrouter);
+app.use('/api/v1/employee', EmployeeRouter);
 // app.post('/api/v1/users/register',upload.single("avatar"), registerUser);
 
 

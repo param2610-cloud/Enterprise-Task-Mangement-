@@ -1,7 +1,8 @@
-import { Employee } from "../model/employee.model";
-import { Room } from "../model/room.model";
-import { ApiResponse } from "../utils/ApiResponse";
-import { asyncHandler } from "../utils/asyncHandler";
+import { Employee } from "../model/employee.model.js";
+import { Room } from "../model/room.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 const AddManagerRole = asyncHandler(async (req, res, next) => {
     const { userId, roomId } = req.body;
@@ -36,4 +37,24 @@ const AddManagerRole = asyncHandler(async (req, res, next) => {
 
 });
 
-export {AddManagerRole};
+const EmployeeDetailsOnUseridAndRoomId = asyncHandler(async(req,res,next) => {
+    const { userId, roomId } = req.query;
+    
+    try {
+        // Fetch employee details
+        const EmployeeDetails = await Employee.findOne({ user: userId, roomid: roomId }).exec();
+
+        // Handle case when employee is not found
+        if (!EmployeeDetails) {
+            return res.status(404).json(new ApiResponse(404, null, "Employee not found"));
+        }
+
+        // Return employee details
+        return res.status(200).json(new ApiResponse(200, EmployeeDetails, "Employee Found"));
+    } catch (error) {
+        // Handle unexpected errors
+        return next(new ApiError(500, "Server Error: " + error.message));
+    }
+})
+
+export {AddManagerRole,EmployeeDetailsOnUseridAndRoomId};

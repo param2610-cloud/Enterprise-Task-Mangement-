@@ -11,7 +11,6 @@ const getEmployeeList = asyncHandler(async (req, res, next) => {
     }
     try {
         const list = await Employee.find({ user: userId });
-        console.log(list);
         return res
             .status(200)
             .json(new ApiResponse(200, list, "Employee News"));
@@ -27,9 +26,12 @@ const getEmployeeList = asyncHandler(async (req, res, next) => {
 const GetRoomDetails = asyncHandler(async (req,res,next)=>{
     const {roomId} = req.query;
     if(!roomId){
+        throw next(
         new ApiError(
             500,
-            error?.message || "Error occured while fethching data.")
+            error?.message || "Error occured while fethching data."
+        )
+    )
     
     }
     const RoomDetails = await Room.findById(roomId);
@@ -41,7 +43,6 @@ const GetRoomDetails = asyncHandler(async (req,res,next)=>{
 const MakeRoom = asyncHandler(async (req, res, next) => {
     const { user, RoomName } = req.body;
     const userId = user;
-    console.log(userId,RoomName)
     if (!userId || !RoomName) {
         throw next(new ApiError(401, "User id not got."));
     }
@@ -65,16 +66,19 @@ const MakeRoom = asyncHandler(async (req, res, next) => {
     if (!CreatedEmployee) {
         throw next(new ApiError(401, "Employee manager is not created yet."));
     }
-    console.log(CreatedEmployee);
     const SyncRoomDetails = await Room.findByIdAndUpdate(RoomDetails._id, {
         $set: { "manager.0": CreatedEmployee._id },
     });
     if (!SyncRoomDetails) {
         throw next(new ApiError(401, "Room is not updated."));
     }
+    const createdRoom2 = await Room.findById(RoomDetails._id);
+    if (!createdRoom2) {
+        throw next(new ApiError(401, "Room is not found."));
+    }
     return res
         .status(201)
-        .json(new ApiResponse(200, createdRoom, "Room created Succesfully"));
+        .json(new ApiResponse(200, createdRoom2, "Room created Succesfully"));
 });
 
 const AddManagerinRoom = asyncHandler(async (req, res, next) => {

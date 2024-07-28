@@ -16,7 +16,6 @@ const registerUser = asyncHandler(async (req, res,next) => {
     );
 
     if (existedUser) {
-        console.log(existedUser);
         throw next(new ApiError(409, "Email is already exists."));
     }
     const avatarlocalpath = req.file?.path;
@@ -27,7 +26,7 @@ const registerUser = asyncHandler(async (req, res,next) => {
     if (!avatarUrl) {
         throw next(new ApiError(400, "Avatar file is required..."));
     }
-    console.log(avatarUrl);
+
     const user = await User.create({
         name: fullName,
         email: email,
@@ -194,7 +193,6 @@ const getUserdetails = asyncHandler(async (req,res,next)=>{
         throw next(new ApiError(401,"No user Id found"));
     }
     const userDetails = await User.findById(userId).select("-refreshToken -password");
-    console.log(userId," found  ",userDetails);
     if(!userDetails){
         throw next(new ApiError(401,"No user details found"));
     }
@@ -208,7 +206,6 @@ const getEmployeedetails = asyncHandler(async (req,res,next)=>{
         throw next(new ApiError(401,"No employee Id found"));
     }
     const employeeDetails = await Employee.findById(employeeId).select("-refreshToken -password");
-    console.log(employeeId," found  ",employeeDetails);
     if(!employeeDetails){
         throw next(new ApiError(401,"No user details found"));
     }
