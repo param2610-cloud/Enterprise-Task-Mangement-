@@ -9,5 +9,5 @@ export const corsoptions = {
         }
     },
     credentials:true,
-    optionSuccessStatus:200
+    optionsSuccessStatus:200
 }
